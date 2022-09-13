@@ -1,10 +1,11 @@
 import sys
 from time import time
+from Scanner import Scanner
 
 def main(file):
     '''Lex Analise (Scanner)'''
     # Return list of tokens
-    pass
+    Scanner(file)
 
 if __name__ == '__main__':
     arg = sys.argv

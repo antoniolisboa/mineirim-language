@@ -14,9 +14,9 @@ class Tokens:
     TK_RW_IF = 9
     TK_RW_ELIF = 10
     TK_RW_ELSE = 11
-    TK_RW_INDETINFIER = 12
 
     # Tokens
+    TK_INDETINFIER = 12
     TK_INTEGER = 13
     TK_REAL = 14
     TK_STRING = 15
