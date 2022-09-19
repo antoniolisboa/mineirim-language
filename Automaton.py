@@ -1,12 +1,16 @@
+from distutils.log import info
+from queue import Empty
+from Colors import Colors
+from ReservedWords import ReservedWords
 from Tokens import Tokens
 import string
 
 class State:
     '''Simboliza um estado do autômato'''
-    def __init__(self, id, condition, transitions=None, token=None, info=None) -> None:
+    def __init__(self, id, transitions=None, condition=None, token=None, info=None) -> None:
         self.id = id                    # Idenficador do estado
-        self.condition = condition      # Indica se o estado é FINAL
         self.transitions = transitions  # Armazena as transições para outros estados
+        self.condition = condition      # Indica se o estado é FINAL
         self.token = token              # Se for estado final indica o token do lexema
         self.info = info                # Uma breve descrição do estado se for FINAL (Isso não é necessário)
 
@@ -45,12 +49,75 @@ class Automaton:
     for i in range(0, 256):
         ascii_table += chr(i)
 
+    table = [] # Tabela de Tokens
+
     def __init__(self) -> None:
-        self.states = {} # Amazena todos os estados do autômato
+        self.states = {} # Armazena todos os estados do autômato
         self.generate()  # Gera o autômato finito
 
-    def validade(code) -> None:
-        pass
+    def validate(self, code) -> list:
+        if code == []:
+            raise Exception(f'{Colors.ERR}Null file!{Colors.END}')
+
+        # Localização do token
+        line_n = 0
+        column_n = 0
+
+        for line in code:
+            line_n += 1
+            column_n = 0
+
+            state = 0
+            lexeme = ''
+
+            for char in line:
+                column_n += 1
+                
+                # Verificar se é comentário (Se for ignora)
+                if char == '#':
+                    break
+
+                # Verifica se o caracter é um espaço em branco (Se for ignora)
+                if char in self.whitespace:
+                    continue
+
+                lexeme += char
+
+                # Próximo caracter a ser validado
+                next_c = self.nextCharacter(line, column_n) 
+
+                # Leitura e validação do token
+                if char in self.states[state].transitions.keys(): # Existe transição?
+                    state = self.states[state].transitions[char]  # Se existir faz transição
+
+                    if next_c in self.states[state].transitions.keys(): # O próximo caracter apresenta transição?
+                        continue                                        # Se existir continua leitura
+
+                    if self.states[state].condition == 'FINAL':
+                        
+                        self.addToken(state, lexeme, line_n, column_n)
+
+                        state = 0
+                        lexeme = ''
+                    else:
+                        raise Exception(f'{Colors.ERR}Inavalid token → \'{char}\', line {line_n}, column {column_n}.{Colors.END}')
+        return self.table
+
+    def nextCharacter(self, line, index):
+        next_c = None
+        if index < len(line):
+            next_c = line[index]
+        return next_c
+
+    def addToken(self, state, lexeme, line_n, column_n) -> None:
+        # Verifica se é identificador (Se for verfica se é palavra reservada)
+        if self.states[state].token == Tokens.TK_INDETINFIER:
+            if lexeme in ReservedWords.rws.keys():
+                self.table.append((lexeme, 'RESERVED WORD', ReservedWords.rws[lexeme], line_n, column_n))
+            else:
+                self.table.append((lexeme, self.states[state].info, self.states[state].token, line_n, column_n))
+        else:
+            self.table.append((lexeme, self.states[state].info, self.states[state].token, line_n, column_n))
 
     def generate(self) -> None:
         '''Gera as transições utilizadas para validar os lexemas das linguagem'''

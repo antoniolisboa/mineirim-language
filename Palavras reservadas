@@ -10,3 +10,5 @@ NéNada      → else (OK)
 InventáModa → function (OK)
 CascaFora   → return (OK)
 Pelejano    → while (OK)
+
+# →  Define um comentário
