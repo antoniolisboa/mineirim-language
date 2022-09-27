@@ -1,6 +1,6 @@
 import sys
 from time import time
-from Colors import Colors
+from Errors import Colors
 from Scanner import Scanner
 
 def main(file):

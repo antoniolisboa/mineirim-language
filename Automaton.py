@@ -1,6 +1,6 @@
 from distutils.log import info
 from queue import Empty
-from Colors import Colors
+from Errors import Colors
 from ReservedWords import ReservedWords
 from Tokens import Tokens
 import string
@@ -96,11 +96,12 @@ class Automaton:
                     if self.states[state].condition == 'FINAL':
                         
                         self.addToken(state, lexeme, line_n, column_n)
-
                         state = 0
                         lexeme = ''
                     else:
-                        raise Exception(f'{Colors.ERR}Inavalid token → \'{char}\', line {line_n}, column {column_n}.{Colors.END}')
+                        raise Exception(f'{Colors.ERR}[Lexical Error] No transition from \'{char}\' to \'{next_c}\', line {line_n}, column {column_n}.{Colors.END}')
+                else:
+                    raise Exception(f'{Colors.ERR}[Lexical Error] {Colors.ERR}Inavalid token → \'{char}\', line {line_n}, column {column_n}.{Colors.END}')
         return self.table
 
     def nextCharacter(self, line, index):
