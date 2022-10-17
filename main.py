@@ -1,16 +1,19 @@
 import sys
 from time import time
-from Errors import Colors
+from Colors import Colors
+from Errors import Errors
 from Scanner import Scanner
 
 def main(file):
 
+    errs = Errors().instance() # Singleton para armazenar todos os erros
     try:
         '''Lex Analise (Scanner)'''
-        # Return list of tokens
-        print(Scanner(file).table)
-    except BaseException as err:
-        print(err)
+        token_table = Scanner(file).table # Análise Léxica → Retorna tabela de tokens
+        print(token_table)
+    except:
+        for err in errs.listErrors:
+            print(err)
 
 if __name__ == '__main__':
     arg = sys.argv

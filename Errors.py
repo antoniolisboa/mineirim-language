@@ -1,5 +1,15 @@
-class Colors:
-    ERR = '\033[31m'
-    TCM = '\033[32m'
-    END = '\033[0m'
-    PRC = ''
+class Errors:
+    _instance = None
+    listErrors = []
+
+    @classmethod
+    def instance(cls):
+        if cls._instance is None:
+            cls._instance = cls()
+        return cls._instance
+
+    def addError(self, err):
+        self.listErrors.append(err)
+
+    def hasError(self) -> bool:
+        return not (self.listErrors == [])
