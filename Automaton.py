@@ -100,7 +100,6 @@ class Automaton:
                         continue                                        # Se existir continua leitura
 
                     if self.states[state].condition == 'FINAL':
-                        print(lexeme)
                         self.addToken(state, lexeme, line_n, column_n)
                         state = 0
                         lexeme = ''

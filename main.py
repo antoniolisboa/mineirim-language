@@ -3,14 +3,16 @@ from time import time
 from Colors import Colors
 from Errors import Errors
 from Scanner import Scanner
+from Parser import Parser
 
 def main(file):
 
     errs = Errors().instance() # Singleton para armazenar todos os erros
+    
     try:
-        '''Lex Analise (Scanner)'''
-        token_table = Scanner(file).table # Análise Léxica → Retorna tabela de tokens
-        print(token_table)
+        '''Front-end Compiler'''
+        tokenTable = Scanner(file).table # Análise Léxica → Retorna tabela de tokens
+        syntacticTree = Parser(tokenTable).tree
     except:
         for err in errs.listErrors:
             print(err)

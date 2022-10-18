@@ -11,4 +11,4 @@ InventáModa → function (OK)
 CascaFora   → return (OK)
 Pelejano    → while (OK)
 
-// →  Define um comentário
+# →  Define um comentário
