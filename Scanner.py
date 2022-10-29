@@ -9,7 +9,3 @@ class Scanner:
             self.content = [line.rstrip() for line in file]
 
         self.table = Automaton().validate(self.content)
-        
-        @property
-        def table(self):
-            return self.table

@@ -4,17 +4,26 @@ from Colors import Colors
 from Errors import Errors
 from Scanner import Scanner
 from Parser import Parser
+from TreePDF import TreePDF
 
 def main(file):
 
-    errs = Errors().instance() # Singleton para armazenar todos os erros
+    # Singleton para armazenar todos os erros
+    errs = Errors().instance() 
     
     try:
         '''Front-end Compiler'''
-        tokenTable = Scanner(file).table # Análise Léxica → Retorna tabela de tokens
-        syntacticTree = Parser(tokenTable).tree
+        
+        # Análise Léxica → Retorna tabela de símbolos
+        symbolTable = Scanner(file).table 
+        # Análise Sintática → Retorna árvore sintática
+        syntacticTree = Parser(symbolTable).tree
+
+        # Gerar PDF da árvore sintática
+        TreePDF(syntacticTree).generate()
     except:
-        for err in errs.listErrors:
+        # Se existir erros os mostra na tela
+        for err in errs.listErrors: 
             print(err)
 
 if __name__ == '__main__':

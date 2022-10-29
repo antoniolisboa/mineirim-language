@@ -49,89 +49,102 @@ class Automaton:
     for i in range(0, 256):
         ascii_table += chr(i)
 
-    errs = Errors().instance()
-    table = [] # Tabela de Tokens
-    is_str = False # Flag de string
+    # Atributos de utilizados na validação
+    errs = Errors().instance() # Singleton que armazena os erros
+    table = [] # Tabela de símbolos
+    isString = False # Flag de string
 
     def __init__(self) -> None:
         self.states = {} # Armazena todos os estados do autômato
         self.generate()  # Gera o autômato finito
 
     def validate(self, code) -> list:
-        if code == []:
-            self.errs.addError(f'{Colors.ERR}Null file!{Colors.END}')
+        if code == []: # Se o arquivo estiver vazio retorna erro imediatamente
+            self.errs.addError(f'{Colors.ERR}Empty file!{Colors.END}')
             raise
 
         # Localização do token
-        line_n = 0
-        column_n = 0
+        nextLine = 0
+        nextColumn = 0
 
+        # Lê linha a linha do código fonte
         for line in code:
-            line_n += 1
-            column_n = 0
+            nextLine += 1
+            nextColumn = 0
 
             state = 0
             lexeme = ''
 
+            # Lê caracter a caracter identificando lexemas
             for char in line:
-                column_n += 1
+                nextColumn += 1
                 
                 # Verificar se é comentário (Se for ignora)
                 if char == '#':
                     break
 
-                if char == '"' and not is_str: # Verifica se é string
-                    is_str = True
+                # Verifica se é string
+                if char == '"' and not isString: 
+                    isString = True
 
-                # Verifica se o caracter é um espaço em branco (Se for ignora)
-                if char in self.whitespace and not is_str: # Caso for um espaço em branco em string pula
+                # Verifica se o caractere é um espaço em branco (Se for ignora)
+                # Caso for um espaço em branco em string pula
+                if char in self.whitespace and not isString: 
                     continue
 
-                # Próximo caracter a ser validado
-                next_c = self.nextCharacter(line, column_n) 
+                # Próximo caractere a ser validado
+                nextChar = self.nextCharacter(line, nextColumn) 
 
                 # Leitura e validação do token
                 if char in self.states[state].transitions.keys(): # Existe transição?
                     lexeme += char
 
-                    state = self.states[state].transitions[char]  # Se existir faz transição
+                    # Faz transição entre estados
+                    state = self.states[state].transitions[char]
 
-                    if next_c in self.states[state].transitions.keys(): # O próximo caracter apresenta transição?
-                        continue                                        # Se existir continua leitura
+                    # Se o próximo caractere apresentar trasição continua análise do próximo caractere
+                    if nextChar in self.states[state].transitions.keys(): 
+                        continue                                       
 
+                    # Caso tenha alcaçado um estado final armazena token recorrente
                     if self.states[state].condition == 'FINAL':
-                        self.addToken(state, lexeme, line_n, column_n)
+                        # Amazena token na tabela de símbolos
+                        self.addToken(state, lexeme, nextLine, nextColumn)
+
+                        # Reset valores para valiadar outros tokens
                         state = 0
                         lexeme = ''
-                        is_str = False
+                        isString = False
                     else:
-                        self.errs.addError(f'{Colors.ERR}[Lexical Error] No transition from \'{char}\' to \'{next_c}\', line {line_n}, column {column_n}.{Colors.END}')
+                        # Erro caso não encontre transição ao ler caractere
+                        position = f', line {nextLine}, column {nextColumn}.{Colors.END}'
+                        msg = f'{Colors.ERR}No transition from \'{char}\' to \'{nextChar}\'{position}'
+                        self.errs.addError(f'{Colors.LEX}[Lexical Error] {msg}')
                         break
                 else:
-                    self.errs.addError(f'{Colors.ERR}[Lexical Error] {Colors.ERR}Inavalid token → \'{char}\', line {line_n}, column {column_n}.{Colors.END}')
+                    # Erro caso encontre um caractere que não pertence ao alfabeto
+                    position = f', line {nextLine}, column {nextColumn}.{Colors.END}'
+                    msg = f'{Colors.ERR}Inavalid token → \'{char}\'{position}'
+                    self.errs.addError(f'{Colors.LEX}[Lexical Error] {msg}')
                     break
-        
-        # Conforme vai para as próximas etapas muda disparo de erro
-        if self.errs.hasError():
-            raise
 
         return self.table
 
     def nextCharacter(self, line, index):
-        next_c = None
+        nextChar = None
         if index < len(line):
-            next_c = line[index]
-        return next_c
+            nextChar = line[index]
+        return nextChar
 
-    def addToken(self, state, lexeme, line_n, column_n) -> None:
+    def addToken(self, state, lexeme, nextLine, nextColumn) -> None:
         # Verifica se é identificador (Se for verfica se é palavra reservada)
         if self.states[state].token == Tokens.TK_INDETINFIER:
             if lexeme in ReservedWords.rws.keys():
-                self.table.append((lexeme, 'RESERVED WORD', ReservedWords.rws[lexeme], line_n, column_n))
+                self.table.append((lexeme, 'RESERVED WORD', ReservedWords.rws[lexeme], nextLine, nextColumn))
             else:
-                self.table.append((lexeme, self.states[state].info, self.states[state].token, line_n, column_n))
+                self.table.append((lexeme, self.states[state].info, self.states[state].token, nextLine, nextColumn))
         else:
-            self.table.append((lexeme, self.states[state].info, self.states[state].token, line_n, column_n))
+            self.table.append((lexeme, self.states[state].info, self.states[state].token, nextLine, nextColumn))
 
     def generate(self) -> None:
         '''Gera as transições utilizadas para validar os lexemas das linguagem'''

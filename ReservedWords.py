@@ -12,7 +12,7 @@ class ReservedWords:
         'QuiNem': Tokens.TK_RW_IF,
         'NuJeito': Tokens.TK_RW_ELIF,
         'NeNada': Tokens.TK_RW_ELSE,
-        'IventaModa': Tokens.TK_RW_FUNCTION,
+        'InventaModa': Tokens.TK_RW_FUNCTION,
         'CascaFora': Tokens.TK_RW_RETURN,
         'Pelejano': Tokens.TK_RW_WHILE
     }
