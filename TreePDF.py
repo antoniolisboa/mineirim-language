@@ -16,8 +16,6 @@ class TreePDF:
         label = f'[{self.id}] {currentNode}'
 
         self.tree.node(label, label)
-            
-        print(currentNode)
 
         self.level += 1
 
@@ -30,4 +28,4 @@ class TreePDF:
         self.level -= 1
 
         if self.level == 0:
-            self.tree.render('SyntaticTree', view=True)
+            self.tree.render('SyntaticTree', view=False)

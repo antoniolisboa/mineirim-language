@@ -5,6 +5,7 @@ from Errors import Errors
 from Scanner import Scanner
 from Parser import Parser
 from TreePDF import TreePDF
+from TablePDF import TablePDF
 
 def main(file):
 
@@ -19,6 +20,8 @@ def main(file):
         # Análise Sintática → Retorna árvore sintática
         syntacticTree = Parser(symbolTable).tree
 
+        # Gera PDF da tabela de simbolos
+        TablePDF(symbolTable).generate()
         # Gerar PDF da árvore sintática
         TreePDF(syntacticTree).generate()
     except:
