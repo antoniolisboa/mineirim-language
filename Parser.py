@@ -1,4 +1,3 @@
-from tokenize import Token
 from Tokens import Tokens
 from Errors import Errors
 from Colors import Colors
@@ -21,6 +20,27 @@ class Node:
 
 class Parser:
     errs = Errors().instance()
+    # List Comparision Operators 
+    listCO = [
+            Tokens.TK_LOGIC_LT,   # a < b
+            Tokens.TK_LOGIC_LTE,  # a <= b
+            Tokens.TK_LOGIC_GT,   # a > b
+            Tokens.TK_LOGIC_GTE,  # a >= b
+            Tokens.TK_LOGIC_EQ,   # a == b
+            Tokens.TK_LOGIC_DIF   # a != b
+    ]
+    # List Logic Operators
+    listLO = [
+        Tokens.TK_LOGIC_AND, # a && b
+        Tokens.TK_LOGIC_OR   # a || b
+    ]
+    # List Math Operators
+    listMO = [ 
+        Tokens.TK_MATH_ADD, # +
+        Tokens.TK_MATH_SUB, # -
+        Tokens.TK_MATH_MUL, # *
+        Tokens.TK_MATH_DIV  # /
+    ]
 
     def __init__(self, tokenTable) -> None:
         self.tokenTable = tokenTable.copy()
@@ -54,7 +74,7 @@ class Parser:
         root = Node('init')
 
         # Verifica se existe função(InventaModa)
-        if self.tokenTable[self.currentToken] != Tokens.TK_RW_MAIN:
+        if self.isTerminal([Tokens.TK_RW_FUNCTION]):
             self.functionDeclaration(root)
         
         self.mainFunction(root)
@@ -201,7 +221,8 @@ class Parser:
             if self.isTerminal([Tokens.TK_STRING]):
                 self.string(currentNode)
             else:
-                self.mathExpression(currentNode)
+                self.logicExpression(currentNode)
+                # self.mathExpression(currentNode)
 
         self.end(currentNode)
 
@@ -215,9 +236,12 @@ class Parser:
     def mathExpression(self, previousNode):
         currentNode = Node('mathExpression')
 
+        if self.isTerminal([Tokens.TK_MATH_ADD, Tokens.TK_MATH_SUB]):
+            self.mathOperator(currentNode)
+
         self.term(currentNode)
         # Se houver + ou -
-        if self.isTerminal([Tokens.TK_MATH_ADD, Tokens.TK_MATH_MUL]):
+        while self.isTerminal([Tokens.TK_MATH_ADD, Tokens.TK_MATH_SUB]):
             self.mathOperator(currentNode)
             self.term(currentNode)
         
@@ -228,8 +252,12 @@ class Parser:
 
         self.factor(currentNode)
         # Se houver * ou /
-        if self.isTerminal([Tokens.TK_MATH_MUL, Tokens.TK_MATH_DIV]):
+        while self.isTerminal([Tokens.TK_MATH_MUL, Tokens.TK_MATH_DIV]):
             self.mathOperator(currentNode)
+            
+            if self.isTerminal([Tokens.TK_MATH_ADD, Tokens.TK_MATH_SUB]):
+                self.mathOperator(currentNode)
+            
             self.factor(currentNode)
 
         previousNode.addChild(currentNode)
@@ -273,6 +301,53 @@ class Parser:
         else:
             self.errorMessage('\';\'')
 
+    def logicExpression(self, previousNode):
+        currentNode = Node('logicExpression')
+
+        self.expression(currentNode)
+
+        while self.isTerminal(self.listLO + self.listMO):
+            if self.isTerminal(self.listMO):
+                self.mathOperator(currentNode)
+            else:
+                self.logicOperator(currentNode)
+            self.expression(currentNode)
+
+        previousNode.addChild(currentNode)
+
+    def logicOperator(self, previousNode):
+        currentNode = Node('logicOperator')
+        self.terminal(currentNode)
+        previousNode.addChild(currentNode)
+
+    def expression(self, previousNode):
+        currentNode = Node('expression')
+
+        self.relation(currentNode)
+
+        while self.isTerminal(self.listCO):
+            self.comparisionOperator(currentNode)
+            self.relation(currentNode)
+
+        previousNode.addChild(currentNode)
+
+    def relation(self, previousNode):
+        currentNode = Node('relation')
+
+        if self.isTerminal([Tokens.TK_OP]):
+            self.openParentheses(currentNode)
+            self.logicExpression(currentNode)
+            self.closeParentheses(currentNode)
+        else:
+            self.mathExpression(currentNode)
+
+        previousNode.addChild(currentNode)
+
+    def comparisionOperator(self, previousNode):
+        currentNode = Node('comparisionOperator')
+        self.terminal(currentNode)
+        previousNode.addChild(currentNode)
+
     def closeKey(self, previousNode):
         if self.isTerminal([Tokens.TK_CK]):
             currentNode = Node('closeKey')
@@ -287,7 +362,7 @@ class Parser:
         currentNode = Node(f'{token}', token, True)
         previousNode.addChild(currentNode)
 
-        # print(token)
+        print(token)
         
         # Verifica se já chegou no fim da tabela de tokens
         if self.currentToken == len(self.tokenTable)-1:

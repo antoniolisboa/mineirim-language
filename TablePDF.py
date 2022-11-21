@@ -15,8 +15,6 @@ class TablePDF:
         data = [['Lexema', 'Descrição', 'Token', 'Linha', 'Coluna']]
         data += self.symbolTable
 
-        print(data)
-
         table = Table(data)
         tableStyle = TableStyle([
             ('ALIGN',(0,0),(-1,-1),'CENTER'),
@@ -27,5 +25,4 @@ class TablePDF:
         table.setStyle(tableStyle)
 
         elements.append(table)
-        print(elements)
         self.doc.build(elements)
