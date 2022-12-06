@@ -3,3 +3,5 @@ EBNF
 EBNF(text)
 /env
 *.mm
+*.pdf
+.gitignore
