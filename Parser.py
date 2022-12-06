@@ -98,7 +98,8 @@ class Parser:
         self.functionParameters(currentNode)
         self.closeParentheses(currentNode)
         self.openKey(currentNode)
-        # self.content(currentNode)
+        self.content(currentNode)
+        self.functionReturn(currentNode)
         self.closeKey(currentNode)
         
         previousNode.addChild(currentNode)
@@ -129,7 +130,31 @@ class Parser:
             self.terminal(currentNode)
             previousNode.addChild(currentNode)
         else:
-            self.errorMessage('\'InventaModa\'')
+            self.errorMessage('\'function reserved word\'')
+
+    def functionReturn(self, previousNode):
+        currentNode = Node('functionReturn')
+
+        self.giveBack(currentNode)
+
+        if self.isTerminal([Tokens.TK_STRING]):
+            self.string(currentNode)
+        elif not self.isTerminal([Tokens.TK_END]):
+            self.logicExpression(currentNode)
+        else:
+            self.errorMessage('\'return value\'')
+
+        self.end(currentNode)
+
+        previousNode.addChild(currentNode)
+    
+    def giveBack(self, previousNode):
+        currentNode = Node('giveBack')
+        if self.isTerminal([Tokens.TK_RW_RETURN]):
+            self.terminal(currentNode)
+        else:
+            self.errorMessage('\'return reserved word\'')
+        previousNode.addChild(currentNode)
 
     def dataType(self, previousNode):
         if self.isTerminal([Tokens.TK_RW_INTEGER, Tokens.TK_RW_REAL, Tokens.TK_RW_STRING]):
@@ -204,12 +229,174 @@ class Parser:
                 self.variableDeclaration(currentNode)
                 hasContente = True
                 continue
+            elif self.isTerminal([Tokens.TK_RW_IF]):
+                # Declaração de if, elif e else
+                self.selectionStructure(currentNode)
+                hasContente = True
+                continue
+            elif self.isTerminal([Tokens.TK_RW_WHILE]):
+                # Declaração de loop
+                self.loop(currentNode)
+                hasContente = True
+                continue
+            elif self.isTerminal([Tokens.TK_RW_PRINT]):
+                self.output(currentNode)
+                hasContente = True
+                continue
+            elif self.isTerminal([Tokens.TK_RW_SCANF]):
+                self.input(currentNode)
+                hasContente = True
+                continue
+            elif self.isTerminal([Tokens.TK_INDETINFIER]):
+                self.valueToVariable(currentNode)
+                hasContente = True
+                continue
             else:
                 break
 
         if hasContente:
             previousNode.addChild(currentNode)
+
+    def valueToVariable(self, previousNode):
+        currentNode = Node('valueToVariable')
+
+        self.identifier(currentNode)
+        self.assignment(currentNode)
+        if self.isTerminal([Tokens.TK_STRING]):
+            self.string(currentNode)
+        else:
+            self.logicExpression(currentNode)
+        self.end(currentNode)
+
+        previousNode.addChild(currentNode)
+
+    def input(self, previousNode):
+        currentNode = Node('input')
+
+        self.rwScanf(currentNode)
+        self.openParentheses(currentNode)
+        self.identifier(currentNode)
+        self.closeParentheses(currentNode)
+        self.end(currentNode)
+
+        previousNode.addChild(currentNode)
+
+    def rwScanf(self, previousNode):
+        currentNode = Node('scanf')
+        self.terminal(currentNode)
+        previousNode.addChild(currentNode)
+
+    def output(self, previousNode):
+        currentNode = Node('output')
+
+        self.rwPrint(currentNode)
+        self.openParentheses(currentNode)
+
+        if self.isTerminal([Tokens.TK_STRING]):
+            self.string(currentNode)
+        elif self.isTerminal([Tokens.TK_CP]):
+            self.errorMessage('\'argument\'')
+        elif self.isTerminal([Tokens.TK_INTEGER, Tokens.TK_REAL, Tokens.TK_INDETINFIER, Tokens.TK_MATH_ADD, Tokens.TK_MATH_SUB]):
+            self.logicExpression(currentNode)
+        
+        while self.isTerminal([Tokens.TK_COMMA]):
+            self.comma(currentNode)
+            if self.isTerminal([Tokens.TK_STRING]):
+                self.string(currentNode)
+            else:
+                self.logicExpression(currentNode)
+
+        self.closeParentheses(currentNode)
+        self.end(currentNode)
+
+        previousNode.addChild(currentNode)
+
+    def rwPrint(self, previousNode):
+        currentNode = Node('print')
+        self.terminal(currentNode)
+        previousNode.addChild(currentNode)
+
+    def loop(self, previousNode):
+        currentNode = Node('loop')
+
+        self.rwWhile(currentNode)
+        self.openParentheses(currentNode)
+        self.logicExpression(currentNode)
+        self.closeParentheses(currentNode)
+        self.openKey(currentNode)
+        self.content(currentNode)
+        self.closeKey(currentNode)
+
+        previousNode.addChild(currentNode)
+
+    def rwWhile(self, previousNode):
+        currentNode = Node('while')
+        self.terminal(currentNode)
+        previousNode.addChild(currentNode)
+
+    def selectionStructure(self, previousNode):
+        currentNode = Node('selectionStructure')
+        self.ifDeclaration(currentNode)
+
+        while self.isTerminal([Tokens.TK_RW_ELIF]):
+            self.elifDeclaration(currentNode)
+
+        if self.isTerminal([Tokens.TK_RW_ELSE]):
+            self.elseDeclaration(currentNode)
+
+        previousNode.addChild(currentNode)
+
+    def ifDeclaration(self, previousNode):
+        currentNode = Node('ifDeclaration')
+        
+        self.rwIf(currentNode)
+        self.openParentheses(currentNode)
+        self.logicExpression(currentNode)
+        self.closeParentheses(currentNode)
+        self.openKey(currentNode)
+        self.content(currentNode)
+        self.closeKey(currentNode)
+
+        previousNode.addChild(currentNode)
+
+    def elifDeclaration(self, previousNode):
+        currentNode = Node('elifDeclaration')
+        
+        self.rwElif(currentNode)
+        self.openParentheses(currentNode)
+        self.logicExpression(currentNode)
+        self.closeParentheses(currentNode)
+        self.openKey(currentNode)
+        self.content(currentNode)
+        self.closeKey(currentNode)
+
+        previousNode.addChild(currentNode)
+
+    def elseDeclaration(self, previousNode):
+        currentNode = Node('elifDeclaration')
+
+        self.rwElse(currentNode)
+        self.openKey(currentNode)
+        self.content(currentNode)
+        self.closeKey(currentNode)
+
+        previousNode.addChild(currentNode)
+
+    def rwIf(self, previousNode):
+        currentNode = Node('if')
+        self.terminal(currentNode)
+        previousNode.addChild(currentNode)
     
+    def rwElif(self, previousNode):
+        currentNode = Node('elif')
+        self.terminal(currentNode)
+        previousNode.addChild(currentNode)
+
+    def rwElse(self, previousNode):
+        currentNode = Node('else')
+        self.terminal(currentNode)
+        previousNode.addChild(currentNode)
+
     def variableDeclaration(self, previousNode):
         currentNode = Node('variableDeclaration')
 
@@ -222,7 +409,6 @@ class Parser:
                 self.string(currentNode)
             else:
                 self.logicExpression(currentNode)
-                # self.mathExpression(currentNode)
 
         self.end(currentNode)
 
@@ -232,7 +418,7 @@ class Parser:
         currentNode = Node('assignment')
         self.terminal(currentNode)
         previousNode.addChild(currentNode)
-
+    
     def mathExpression(self, previousNode):
         currentNode = Node('mathExpression')
 
@@ -270,12 +456,44 @@ class Parser:
             self.mathExpression(currentNode)
             self.closeParentheses(currentNode)
         elif self.isTerminal([Tokens.TK_INDETINFIER]):
-            self.identifier(currentNode)
+            if self.tokenTable[self.currentToken+1][2] == Tokens.TK_OP:
+                self.functionCall(currentNode)
+            else:
+                self.identifier(currentNode)
         elif self.isTerminal([Tokens.TK_REAL, Tokens.TK_INTEGER]):
             self.number(currentNode)
         else:
             self.errorMessage('\'attribution value\'')
         
+        previousNode.addChild(currentNode)
+
+    def functionCall(self, previousNode):
+        currentNode = Node('functionCall')
+        
+        self.identifier(currentNode)
+        self.openParentheses(currentNode)
+
+        if not self.isTerminal([Tokens.TK_CP]):
+            self.parameterPassing(currentNode)
+
+        self.closeParentheses(currentNode)
+
+        previousNode.addChild(currentNode)
+
+    def parameterPassing(self, previousNode):
+        currentNode = Node('parameterPassing')
+
+        if self.isTerminal([Tokens.TK_STRING]):
+            self.string(currentNode)
+        else:
+            self.logicExpression(currentNode)
+
+        while self.isTerminal([Tokens.TK_COMMA]):
+            if self.isTerminal([Tokens.TK_STRING]):
+                self.string(currentNode)
+            else:
+                self.logicExpression(currentNode)
+
         previousNode.addChild(currentNode)
 
     def mathOperator(self, previousNode):
