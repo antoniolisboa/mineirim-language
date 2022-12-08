@@ -135,9 +135,7 @@ class Parser:
 
         self.giveBack(currentNode)
 
-        if self.isTerminal([Tokens.TK_STRING]):
-            self.string(currentNode)
-        elif not self.isTerminal([Tokens.TK_END]):
+        if not self.isTerminal([Tokens.TK_END]):
             self.logicExpression(currentNode)
         else:
             self.errorMessage('\'return value\'')
@@ -260,10 +258,7 @@ class Parser:
 
         self.identifier(currentNode)
         self.assignment(currentNode)
-        if self.isTerminal([Tokens.TK_STRING]):
-            self.string(currentNode)
-        else:
-            self.logicExpression(currentNode)
+        self.logicExpression(currentNode)
         self.end(currentNode)
 
         previousNode.addChild(currentNode)
@@ -290,19 +285,14 @@ class Parser:
         self.rwPrint(currentNode)
         self.openParentheses(currentNode)
 
-        if self.isTerminal([Tokens.TK_STRING]):
-            self.string(currentNode)
-        elif self.isTerminal([Tokens.TK_CP]):
+        if self.isTerminal([Tokens.TK_CP]):
             self.errorMessage('\'argument\'')
-        elif self.isTerminal([Tokens.TK_INTEGER, Tokens.TK_REAL, Tokens.TK_INDETINFIER, Tokens.TK_MATH_ADD, Tokens.TK_MATH_SUB]):
+        elif self.isTerminal([Tokens.TK_INTEGER, Tokens.TK_REAL, Tokens.TK_INDETINFIER, Tokens.TK_MATH_ADD, Tokens.TK_MATH_SUB, Tokens.TK_STRING]):
             self.logicExpression(currentNode)
         
         while self.isTerminal([Tokens.TK_COMMA]):
             self.comma(currentNode)
-            if self.isTerminal([Tokens.TK_STRING]):
-                self.string(currentNode)
-            else:
-                self.logicExpression(currentNode)
+            self.logicExpression(currentNode)
 
         self.closeParentheses(currentNode)
         self.end(currentNode)
@@ -403,10 +393,7 @@ class Parser:
 
         if self.isTerminal([Tokens.TK_ASSIGNMENT]):
             self.assignment(currentNode)
-            if self.isTerminal([Tokens.TK_STRING]):
-                self.string(currentNode)
-            else:
-                self.logicExpression(currentNode)
+            self.logicExpression(currentNode)
 
         self.end(currentNode)
 
@@ -460,6 +447,8 @@ class Parser:
                 self.identifier(currentNode)
         elif self.isTerminal([Tokens.TK_REAL, Tokens.TK_INTEGER]):
             self.number(currentNode)
+        elif self.isTerminal([Tokens.TK_STRING]):
+            self.string(currentNode)
         else:
             self.errorMessage('\'attribution value\'')
         
@@ -481,16 +470,11 @@ class Parser:
     def parameterPassing(self, previousNode):
         currentNode = Node('parameterPassing')
 
-        if self.isTerminal([Tokens.TK_STRING]):
-            self.string(currentNode)
-        else:
-            self.logicExpression(currentNode)
+        self.logicExpression(currentNode)
 
         while self.isTerminal([Tokens.TK_COMMA]):
-            if self.isTerminal([Tokens.TK_STRING]):
-                self.string(currentNode)
-            else:
-                self.logicExpression(currentNode)
+            self.comma(currentNode)
+            self.logicExpression(currentNode)
 
         previousNode.addChild(currentNode)
 
