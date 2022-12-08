@@ -52,17 +52,15 @@ class Automaton:
     # Atributos de utilizados na validação
     errs = Errors().instance() # Singleton que armazena os erros
     table = [] # Tabela de símbolos
-    isString = False # Flag de string
 
     def __init__(self) -> None:
         self.states = {} # Armazena todos os estados do autômato
         self.generate()  # Gera o autômato finito
 
     def validate(self, code) -> list:
-        if code == []: # Se o arquivo estiver vazio retorna erro imediatamente
-            self.errs.addError(f'{Colors.ERR}Empty file!{Colors.END}')
-            raise
-
+        if code == []: # Se o arquivo estiver vazio retorna erro 
+            raise self.errs.addError(f'{Colors.ERR}Empty file!{Colors.END}')
+    
         # Localização do token
         nextLine = 0
         nextColumn = 0
@@ -72,16 +70,22 @@ class Automaton:
             nextLine += 1
             nextColumn = 0
 
+            isString = False # Flag de string
+            isComment = False# Flag de comentário
+
             state = 0
             lexeme = ''
 
             # Lê caracter a caracter identificando lexemas
             for char in line:
                 nextColumn += 1
-                
+
                 # Verificar se é comentário (Se for ignora)
                 if char == '#':
-                    break
+                    isComment = True
+                
+                if isComment:
+                    continue
 
                 # Verifica se é string
                 if char == '"' and not isString: 

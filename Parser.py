@@ -79,9 +79,7 @@ class Parser:
         
         self.mainFunction(root)
 
-        print('End parsing!')
-
-        # Conforme vai para as próximas etapas muda disparo de erro
+        # Disparo de erro
         if self.errs.hasError():
             raise
 
@@ -580,8 +578,6 @@ class Parser:
         currentNode = Node(f'{token}', token, True)
         previousNode.addChild(currentNode)
 
-        print(token)
-        
         # Verifica se já chegou no fim da tabela de tokens
         if self.currentToken == len(self.tokenTable)-1:
             self.isEnd = False

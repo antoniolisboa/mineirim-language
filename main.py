@@ -3,6 +3,7 @@ from time import time
 from Colors import Colors
 from Errors import Errors
 from Scanner import Scanner
+from Semantic import Semantic
 from Parser import Parser
 from TreePDF import TreePDF
 from TablePDF import TablePDF
@@ -16,9 +17,11 @@ def main(file):
         '''Front-end Compiler'''
         
         # Análise Léxica → Retorna tabela de símbolos
-        symbolTable = Scanner(file).table 
+        symbolTable = Scanner(file).table
         # Análise Sintática → Retorna árvore sintática
         syntacticTree = Parser(symbolTable).tree
+        # Análise 
+        Semantic(symbolTable, syntacticTree).check()
 
         # Gera PDF da tabela de simbolos
         TablePDF(symbolTable).generate()
