@@ -74,14 +74,15 @@ class Semantic:
 
             if self.isAttribution:
                 if identifierType[self.idToCheck] in self.variableType[0:2]:
-                    print(self.idToCheck)
-                    print(identifierType)
-                    print(token[0])
-                    if token[0] in identifierType:
+                    if token[0] in identifierType or token[2] == self.variableType[3]:
                         if token[2] == Tokens.TK_STRING or identifierType[token[0]] == Tokens.TK_RW_STRING:
                             print(token[0])
                             self.errorType = 3
                             self.errorMessage(f'{function}', f'\'{token[0]}\'')
+                elif identifierType[self.idToCheck] == self.variableType[3]:
+                    if token[0] in identifierType or token[2] in self.variableType[0:2]:
+                        if token[2] == Tokens.TK_STRING or identifierType[token[0]] == Tokens.TK_RW_STRING:
+                            pass
 
                 if token[2] == Tokens.TK_END:
                     self.isAttribution = False
