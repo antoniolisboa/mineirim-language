@@ -55,7 +55,6 @@ class Parser:
             # verfica se o token corresponde 
             if self.tokenTable[self.currentToken][2] in token:
                 return True
-        
         # False se já chegou ao fim ou o token não corresponde 
         return False        
 
@@ -74,7 +73,7 @@ class Parser:
         root = Node('init')
 
         # Verifica se existe função(InventaModa)
-        if self.isTerminal([Tokens.TK_RW_FUNCTION]):
+        while self.isTerminal([Tokens.TK_RW_FUNCTION]):
             self.functionDeclaration(root)
         
         self.mainFunction(root)

@@ -123,14 +123,12 @@ class Automaton:
                         # Erro caso não encontre transição ao ler caractere
                         position = f', line {nextLine}, column {nextColumn}.{Colors.END}'
                         msg = f'{Colors.ERR}No transition from \'{char}\' to \'{nextChar}\'{position}'
-                        self.errs.addError(f'{Colors.LEX}[Lexical Error] {msg}')
-                        break
+                        raise self.errs.addError(f'{Colors.LEX}[Lexical Error] {msg}')
                 else:
                     # Erro caso encontre um caractere que não pertence ao alfabeto
                     position = f', line {nextLine}, column {nextColumn}.{Colors.END}'
                     msg = f'{Colors.ERR}Inavalid token → \'{char}\'{position}'
-                    self.errs.addError(f'{Colors.LEX}[Lexical Error] {msg}')
-                    break
+                    raise self.errs.addError(f'{Colors.LEX}[Lexical Error] {msg}')
 
         return self.table
 
