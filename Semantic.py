@@ -162,7 +162,6 @@ class Semantic:
                 if functionType[functions[-1]] in [Tokens.TK_RW_INTEGER, Tokens.TK_RW_REAL]:
                     if token[2] != Tokens.TK_INDETINFIER:
                         if token[2] == Tokens.TK_STRING:
-                            print(token[0])
                             self.errorType = 6
                             self.errorMessage(f'{function}', f'\'integer or real\'')
                     elif identifierType[token[0]] == Tokens.TK_RW_STRING:

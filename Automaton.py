@@ -67,7 +67,6 @@ class Automaton:
 
         # Lê linha a linha do código fonte
         for line in code:
-            nextLine += 1
             nextColumn = 0
 
             isString = False # Flag de string
@@ -130,6 +129,7 @@ class Automaton:
                     msg = f'{Colors.ERR}Inavalid token → \'{char}\'{position}'
                     raise self.errs.addError(f'{Colors.LEX}[Lexical Error] {msg}')
 
+            nextLine += 1
         return self.table
 
     def nextCharacter(self, line, index):
